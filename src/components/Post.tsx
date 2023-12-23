@@ -1,5 +1,6 @@
 "use client"
 
+import { PostProps } from "@/lib/models/post"
 import { extractFirstLink, getWebsiteURL } from "@/lib/utils"
 import {
   Card,
@@ -19,7 +20,7 @@ import PostAvatar from "./PostAvatar"
 import PostImage from "./PostImage"
 
 interface PostProprieties {
-  post?: Discussion
+  post?: PostProps
 }
 
 export default function Post({ post }: PostProprieties): ReactElement {
@@ -77,7 +78,7 @@ export default function Post({ post }: PostProprieties): ReactElement {
             <Flex gap={1} align={"center"}>
               <PiggyBank strokeWidth={"1.5"} color="darkgray" size={"20px"} />
               <Text color={"darkgray"} fontSize={"13px"} fontWeight={"400"}>
-                ${post && getEarnings(post).toFixed(2)}
+                ${post?.earnings}
               </Text>
             </Flex>
           </Tooltip>
@@ -90,7 +91,7 @@ export default function Post({ post }: PostProprieties): ReactElement {
       />
       <CardFooter pt={0} flexDirection={"column"} gap={2}>
         <Flex w={"100%"} justify={"space-between"} align={"center"}>
-          {post && getVoters(post)}
+          {/* {post && getVoters(post)} */}
           <Stack direction={"row"}>
             <Tooltip label={hasCopied ? "Copied!" : "Copy link"}>
               <Icon
@@ -151,22 +152,6 @@ function formatTimeSince(dateString: string): string {
     const month = monthNames[postDate.getMonth()]
     return `${day} ${month}`
   }
-}
-
-function getEarnings(post: Discussion | any): number {
-  if (post.hasOwnProperty("payout")) return post.payout
-
-  const totalPayout = parseFloat(
-    post.total_payout_value.toString().split(" ")[0]
-  )
-  const curatorPayout = parseFloat(
-    post.curator_payout_value.toString().split(" ")[0]
-  )
-  const pendingPayout = parseFloat(
-    post.pending_payout_value.toString().split(" ")[0]
-  )
-  const totalEarnings = totalPayout + curatorPayout + pendingPayout
-  return totalEarnings
 }
 
 function getVoters(post: Discussion) {

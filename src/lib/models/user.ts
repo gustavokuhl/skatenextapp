@@ -1,11 +1,11 @@
-export default class User {
+export default class UserModel {
   id: number
   name: string
   created: string
   posting_json_metadata: string
-  metadata?: Metadata
+  metadata?: UserMetadata
 
-  constructor(user?: User) {
+  constructor(user?: UserModel) {
     this.id = user?.id || 0
     this.name = user?.name || ""
     this.created = user?.created || ""
@@ -14,12 +14,13 @@ export default class User {
   }
 }
 
-interface Metadata {
-  profile: Profile
+interface UserMetadata {
+  profile: UserProfile
 }
 
-interface Profile {
+interface UserProfile {
   website: string
   profile_image: string
   cover_image: string
+  about: string
 }
