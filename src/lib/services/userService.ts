@@ -1,17 +1,14 @@
-import HiveClient from "@/lib/hiveclient"
-import User from "@/lib/user"
+"use server"
 
+import HiveClient from "@/lib/hiveclient"
+import { UserProps } from "../models/user"
 const hiveClient = HiveClient()
 
-export default class UserService {
-  public async getByName(username: string): Promise<User> {
-    "use server"
-    try {
-      const data = await hiveClient.database.getAccounts([username])
-      if (data.length === 0) throw new Error("User not found")
-      return new User(data[0] as User)
-    } catch (ex: any) {
-      throw new Error(ex)
-    }
-  }
+export async function getUserFromUsername(
+  username: string
+): Promise<UserProps> {
+  const response = await hiveClient.database.getAccounts([username])
+  if (Array.isArray(response) && response.length > 0)
+    return response[0] as UserProps
+  return {} as UserProps
 }

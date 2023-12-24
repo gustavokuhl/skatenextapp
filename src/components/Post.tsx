@@ -1,12 +1,14 @@
 "use client"
 
 import PostModel, { PostProps } from "@/lib/models/post"
+import UserModel, { UserProps } from "@/lib/models/user"
 import {
   Card,
   CardFooter,
   CardHeader,
   Flex,
   Icon,
+  Link,
   Stack,
   Text,
   Tooltip,
@@ -17,12 +19,18 @@ import { ReactElement } from "react"
 import PostAvatar from "./PostAvatar"
 import PostImage from "./PostImage"
 
-interface PostProprieties {
+export interface PostComponentProps {
   postData: PostProps
+  userData: UserProps
 }
 
-export default function Post({ postData }: PostProprieties): ReactElement {
+export default function Post({
+  postData,
+  userData,
+}: PostComponentProps): ReactElement {
   const post = new PostModel(postData)
+  const user = new UserModel(userData)
+
   const { onCopy, hasCopied } = useClipboard(post.getFullUrl())
   return (
     <Card
@@ -38,10 +46,15 @@ export default function Post({ postData }: PostProprieties): ReactElement {
       <CardHeader pb={0}>
         <Flex gap="4" align={"end"}>
           <Flex flex="1" gap="2" alignItems="center">
-            <PostAvatar
-              name={post.author}
-              src={`https://images.ecency.com/webp/u/${post.author}/avatar/small`}
-            />
+            <Link href={post.getFullAuthorUrl()}>
+              <PostAvatar
+                name={user.name}
+                src={
+                  user.metadata?.profile.profile_image ||
+                  `https://images.ecency.com/webp/u/${user.name}/avatar/small`
+                }
+              />
+            </Link>
             <Flex flexDir="column" gap={0}>
               <Flex gap={1} alignItems="center">
                 <Text fontSize="14px" as="b">
@@ -72,7 +85,7 @@ export default function Post({ postData }: PostProprieties): ReactElement {
       <PostImage
         src={post.getThumbnail()}
         alt={post.title}
-        linkUrl={`post${post.url}`}
+        linkUrl={post.getFullUrl()}
       />
       <CardFooter pt={0} flexDirection={"column"} gap={2}>
         <Flex w={"100%"} justify={"space-between"} align={"center"}>

@@ -1,3 +1,5 @@
+import { getUserFromUsername } from "../services/userService"
+
 export interface UserProps {
   id: number
   name: string
@@ -18,6 +20,20 @@ export default class UserModel {
     this.created = user?.created || ""
     this.posting_json_metadata = user?.posting_json_metadata || "{}"
     this.metadata = JSON.parse(this.posting_json_metadata)
+  }
+
+  simplify(): UserProps {
+    return {
+      id: this.id,
+      name: this.name,
+      created: this.created,
+      posting_json_metadata: this.posting_json_metadata,
+    }
+  }
+
+  static async getNewFromUsername(username: string) {
+    const userData = await getUserFromUsername(username)
+    return new UserModel(userData)
   }
 }
 
