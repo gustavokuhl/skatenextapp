@@ -1,20 +1,28 @@
-import Post from "@/components/Post"
+import Post, { PostComponentProps } from "@/components/Post"
 import ProfileHeader from "@/components/ProfileHeader"
 import HiveClient from "@/lib/hiveclient"
-import PostModel, { PostProps } from "@/lib/models/post"
+import PostModel from "@/lib/models/post"
 import { getUserFromUsername } from "@/lib/services/userService"
 import { VStack } from "@chakra-ui/react"
 
 const hiveClient = HiveClient()
 
-async function getBlogFromUsername(username: string): Promise<PostProps[]> {
+async function getBlogFromUsername(
+  username: string
+): Promise<PostComponentProps[]> {
   const response = await hiveClient.database.getDiscussions("blog", {
     limit: 20,
     tag: username,
   })
   if (Array.isArray(response) && response.length > 0)
-    return response.map((post) => PostModel.simplifyFromDiscussion(post))
-  return [{} as PostModel]
+    return await Promise.all(
+      response.map(async (postData) => {
+        const post = PostModel.newFromDiscussion(postData)
+        const user = await post.authorDetails()
+        return { postData: post.simplify(), userData: user.simplify() }
+      })
+    )
+  return [{} as PostComponentProps]
 }
 
 interface ProfilePageProps {
@@ -30,7 +38,10 @@ export default async function ProfilePage({ params }: ProfilePageProps) {
     <VStack>
       <ProfileHeader userData={user} />
       <VStack align="stretch" spacing={4} p={2}>
-        {posts && posts.map((post, i) => <Post key={i} postData={post} />)}
+        {posts &&
+          posts.map(({ postData, userData }, i) => (
+            <Post key={i} postData={postData} userData={userData} />
+          ))}
       </VStack>
     </VStack>
   )
