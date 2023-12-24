@@ -1,7 +1,6 @@
 "use client"
 
-import { PostProps } from "@/lib/models/post"
-import { extractFirstLink, getWebsiteURL } from "@/lib/utils"
+import PostModel, { PostProps } from "@/lib/models/post"
 import {
   Card,
   CardFooter,
@@ -13,32 +12,18 @@ import {
   Tooltip,
   useClipboard,
 } from "@chakra-ui/react"
-import { Discussion } from "@hiveio/dhive"
 import { Check, Heart, MessageCircle, PiggyBank, Send } from "lucide-react"
 import { ReactElement } from "react"
 import PostAvatar from "./PostAvatar"
 import PostImage from "./PostImage"
 
 interface PostProprieties {
-  post?: PostProps
+  postData: PostProps
 }
 
-export default function Post({ post }: PostProprieties): ReactElement {
-  const postMetadata = post
-    ? typeof post.json_metadata === "object"
-      ? post.json_metadata
-      : JSON.parse(post.json_metadata)
-    : {}
-  const postAuthor = post?.author || ""
-
-  const fullPostUrl = post ? `${getWebsiteURL()}/post${post.url}` : "#"
-  const { onCopy, hasCopied } = useClipboard(fullPostUrl)
-
-  const postBanner =
-    (postMetadata?.image && postMetadata.image[0]) ||
-    (post?.body && extractFirstLink(post?.body)) ||
-    ""
-
+export default function Post({ postData }: PostProprieties): ReactElement {
+  const post = new PostModel(postData)
+  const { onCopy, hasCopied } = useClipboard(post.getFullUrl())
   return (
     <Card
       size="sm"
@@ -54,23 +39,23 @@ export default function Post({ post }: PostProprieties): ReactElement {
         <Flex gap="4" align={"end"}>
           <Flex flex="1" gap="2" alignItems="center">
             <PostAvatar
-              name={postAuthor}
-              src={`https://images.ecency.com/webp/u/${postAuthor}/avatar/small`}
+              name={post.author}
+              src={`https://images.ecency.com/webp/u/${post.author}/avatar/small`}
             />
             <Flex flexDir="column" gap={0}>
               <Flex gap={1} alignItems="center">
                 <Text fontSize="14px" as="b">
-                  {post?.author}
+                  {post.author}
                 </Text>
                 <Text fontSize="14px" color="darkgray">
                   ·
                 </Text>
                 <Text fontSize="12px" color="darkgray" fontWeight="300">
-                  {post && formatTimeSince(post?.created)}
+                  {formatTimeSince(post.created)}
                 </Text>
               </Flex>
               <Text fontSize="14px" noOfLines={1}>
-                {post?.title}
+                {post.title}
               </Text>
             </Flex>
           </Flex>
@@ -78,20 +63,20 @@ export default function Post({ post }: PostProprieties): ReactElement {
             <Flex gap={1} align={"center"}>
               <PiggyBank strokeWidth={"1.5"} color="darkgray" size={"20px"} />
               <Text color={"darkgray"} fontSize={"13px"} fontWeight={"400"}>
-                ${post?.earnings}
+                ${post.getEarnings()}
               </Text>
             </Flex>
           </Tooltip>
         </Flex>
       </CardHeader>
       <PostImage
-        src={postBanner}
-        alt={post?.title || ""}
-        linkUrl={post ? "post" + post.url : "#"}
+        src={post.getThumbnail()}
+        alt={post.title}
+        linkUrl={`post${post.url}`}
       />
       <CardFooter pt={0} flexDirection={"column"} gap={2}>
         <Flex w={"100%"} justify={"space-between"} align={"center"}>
-          {/* {post && getVoters(post)} */}
+          {getVoters(post)}
           <Stack direction={"row"}>
             <Tooltip label={hasCopied ? "Copied!" : "Copy link"}>
               <Icon
@@ -154,7 +139,7 @@ function formatTimeSince(dateString: string): string {
   }
 }
 
-function getVoters(post: Discussion) {
+function getVoters(post: PostProps) {
   if (!post.active_votes || !post.active_votes.length)
     return <Text fontSize={"sm"}>No votes</Text>
 

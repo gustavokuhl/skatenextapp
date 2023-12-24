@@ -1,3 +1,10 @@
+export interface UserProps {
+  id: number
+  name: string
+  created: string
+  posting_json_metadata: string
+}
+
 export default class UserModel {
   id: number
   name: string
@@ -5,7 +12,7 @@ export default class UserModel {
   posting_json_metadata: string
   metadata?: UserMetadata
 
-  constructor(user?: UserModel) {
+  constructor(user?: UserProps) {
     this.id = user?.id || 0
     this.name = user?.name || ""
     this.created = user?.created || ""
