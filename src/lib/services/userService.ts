@@ -8,6 +8,7 @@ export async function getUserFromUsername(
   username: string
 ): Promise<UserProps> {
   const response = await hiveClient.database.getAccounts([username])
+  console.log(response)
   if (Array.isArray(response) && response.length > 0)
     return response[0] as UserProps
   return {} as UserProps
